@@ -21,7 +21,7 @@ const s3Client = new S3Client({
 const categoryUpload = multer({
   storage: multerS3({
     s3: s3Client,
-    bucket: "waveslocation",
+    bucket: "alraqy-location",
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (req, file, cb) => {
       cb(null, Date.now().toString() + "-" + file.originalname);

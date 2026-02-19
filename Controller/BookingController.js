@@ -107,7 +107,7 @@ export const confirmBooking = async (req, res) => {
 
     const property = await PropertyModel.findById(booking.property);
     const confirmationEmail = generateConfirmationEmailTemplate(booking, property, paymentMethod);
-    sendEmail(booking.guestEmail, "Booking Confirmation - Wavescation", confirmationEmail).catch(err => 
+    sendEmail(booking.guestEmail, "Booking Confirmation - Alrkn Alraqy Hotel Management", confirmationEmail).catch(err => 
       console.error("Email failed:", err)
     );
 
@@ -508,7 +508,7 @@ export const verifyAFSPayment = async (req, res) => {
       
       sendEmail(
         booking.guestEmail, 
-        'Payment Successful - Wavescation Booking Confirmed', 
+        'Payment Successful - Alrkn Alraqy Hotel Management Booking Confirmed', 
         emailHtml
       ).catch((err) => console.error('📧 Email error:', err));
 
@@ -715,7 +715,7 @@ function generatePaymentSuccessEmailTemplate(booking, property, paymentData) {
           
           <div class="message">
             Great news! Your payment has been processed successfully and your booking is now confirmed. 
-            Get ready for an amazing stay with Wavescation!
+            Get ready for an amazing stay with Alrkn Alraqy Hotel Management!
           </div>
 
           <!-- Payment Info -->
@@ -737,7 +737,7 @@ function generatePaymentSuccessEmailTemplate(booking, property, paymentData) {
 
             <div class="detail-row">
               <span class="detail-label">Property</span>
-              <span class="detail-value property-name">${property?.name || 'Wavescation Property'}</span>
+              <span class="detail-value property-name">${property?.name || 'Alrkn Alraqy Hotel Management Property'}</span>
             </div>
 
             <div class="detail-row">
@@ -825,7 +825,7 @@ function generatePaymentSuccessEmailTemplate(booking, property, paymentData) {
           </div>
 
           <div class="footer-text">
-            © ${new Date().getFullYear()} Wavescation. All rights reserved.<br>
+            © ${new Date().getFullYear()} Alrkn Alraqy Hotel Management. All rights reserved.<br>
             This is an automated email. Please do not reply directly to this message.
           </div>
         </div>
@@ -900,7 +900,7 @@ function generateConfirmationEmailTemplate(booking, property, paymentMethod) {
           <div class="greeting">Hi ${booking.guestName || 'Guest'},</div>
           
           <div class="message">
-            Thank you for your booking with Wavescation! Your reservation has been confirmed.
+            Thank you for your booking with Alrkn Alraqy Hotel Management! Your reservation has been confirmed.
             ${isPayAtProperty ? ' Please note that payment will be collected at the property upon arrival.' : ''}
           </div>
 
@@ -924,7 +924,7 @@ function generateConfirmationEmailTemplate(booking, property, paymentMethod) {
 
             <div class="detail-row">
               <span class="detail-label">Property</span>
-              <span class="detail-value property-name">${property?.name || 'Wavescation Property'}</span>
+              <span class="detail-value property-name">${property?.name || 'Alrkn Alraqy Hotel Management Property'}</span>
             </div>
 
             <div class="detail-row">
@@ -969,7 +969,7 @@ function generateConfirmationEmailTemplate(booking, property, paymentMethod) {
             Visit: www.wavescation.com
           </div>
           <div class="footer-text">
-            © ${new Date().getFullYear()} Wavescation. All rights reserved.
+            © ${new Date().getFullYear()} Alrkn Alraqy Hotel Management. All rights reserved.
           </div>
         </div>
       </div>
