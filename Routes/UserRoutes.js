@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import {Userlogin,UserRegister,userlogout, getUser, updateuser, updatePass, forgotPassword, validateResetToken, resetPassword, VerifyOtp, ResendOtp} from "../Controller/AuthController.js"
-import {getLocation, getproperties, getproperty} from "../Controller/Propertiescontroller.js"
+import {getFeaturedProperties, getLocation, getRecommendedProperties, getproperties, getproperty, toggleFeaturedProperty} from "../Controller/Propertiescontroller.js"
 import { bookingbyuser, createBooking, updateBookingDetails, confirmBooking, getCheckout, cancelBooking, initializeAFSPayment, verifyAFSPayment, checkPaymentStatus} from "../Controller/BookingController.js";
 import { googleAuth } from "../Controller/GoogleAuthController.js";
 import { submitReview,  getPropertyReviews,  markReviewHelpful, getUserReviews,  updateReview,  deleteReview } from "../Controller/ReviewController.js";
@@ -24,7 +24,12 @@ router.post("/forgot-password", forgotPassword);
 router.get("/validate-reset-token/:token", validateResetToken);
 router.post("/reset-password", resetPassword);
 
+
+
 router.get('/location', getLocation);
+router.get("/properties/featured", getFeaturedProperties);
+router.get("/properties/recommended", getRecommendedProperties);
+router.put("/property/:id/toggle-featured", toggleFeaturedProperty);
 router.get("/properties", getproperties);
 router.get("/property/:id", getproperty);
 

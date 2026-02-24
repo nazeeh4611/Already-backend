@@ -33,6 +33,7 @@ export const getLocation = async (req, res) => {
     console.error(error);
   }
 };
+
 export const getproperties = async (req, res) => {
   try {
     const {
@@ -50,13 +51,17 @@ export const getproperties = async (req, res) => {
       bedrooms,
       bathrooms,
       minArea,
+      featured,
+      recommended,
       page = 1,
       limit = 12,
     } = req.query;
 
-    // console.log('Search params:', { checkin, checkout, locationId, adults, children, infants });
-
     let baseFilter = { status: true };
+
+    if (featured === 'true') {
+      baseFilter.isFeatured = true;
+    }
 
     if (location) {
       baseFilter.location = { $regex: location, $options: "i" };
@@ -94,7 +99,6 @@ export const getproperties = async (req, res) => {
 
     if (checkin && checkout) {
       hasDateFilter = true;
-      // console.log('Filtering by dates:', { checkin, checkout });
     
       const overlappingBookings = await BookingModel.find({
         bookingStatus: "confirmed",
@@ -109,8 +113,6 @@ export const getproperties = async (req, res) => {
       })
         .select("property checkIn checkOut bookingStatus")
         .lean();
-    
-      // console.log('Found overlapping bookings:', overlappingBookings.length);
     
       const allProperties = await PropertyModel.find({
         'availability.blockedDates': { $exists: true, $ne: [] }
@@ -131,14 +133,10 @@ export const getproperties = async (req, res) => {
         });
       });
     
-      // console.log('Properties with blocked dates:', propertiesWithBlockedDates.length);
-    
       const bookingPropertyIds = overlappingBookings.map((booking) => booking.property.toString());
       const blockedPropertyIds = propertiesWithBlockedDates.map(p => p._id.toString());
       
       unavailablePropertyIds = [...new Set([...bookingPropertyIds, ...blockedPropertyIds])];
-      
-      // console.log('Total unavailable properties:', unavailablePropertyIds.length);
     
       if (unavailablePropertyIds.length > 0) {
         filter._id = { $nin: unavailablePropertyIds.map(id => new mongoose.Types.ObjectId(id)) };
@@ -147,23 +145,26 @@ export const getproperties = async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    // console.log('Final filter:', JSON.stringify(filter, null, 2));
-    // console.log('Total in DB:', totalPropertiesInDatabase, 'Has date filter:', hasDateFilter);
+    let sortOption = { createdAt: -1 };
+    
+    if (recommended === 'true') {
+      sortOption = { bookingCount: -1, createdAt: -1 };
+    } else if (featured === 'true') {
+      sortOption = { featuredOrder: 1, createdAt: -1 };
+    }
 
     const [properties, totalCount] = await Promise.all([
       PropertyModel.find(filter)
         .select(
-          "title type pricing bedrooms bathrooms guests area location images propertyHighlights amenities createdAt neighborhood status ratings"
+          "title type pricing bedrooms bathrooms guests area location images propertyHighlights amenities createdAt neighborhood status ratings isFeatured featuredOrder bookingCount"
         )
         .populate("neighborhood", "name")
-        .sort({ createdAt: -1 })
+        .sort(sortOption)
         .skip(skip)
         .limit(parseInt(limit))
         .lean(),
       PropertyModel.countDocuments(filter),
     ]);
-
-    // console.log('Properties found:', properties.length, 'Total count:', totalCount);
 
     res.status(200).json({
       success: true,
@@ -211,5 +212,94 @@ export const getproperty = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getFeaturedProperties = async (req, res) => {
+  try {
+    const properties = await PropertyModel.find({ 
+      status: true, 
+      isFeatured: true 
+    })
+      .select(
+        "title type pricing bedrooms bathrooms guests area location images propertyHighlights amenities neighborhood ratings isFeatured featuredOrder"
+      )
+      .populate("neighborhood", "name")
+      .sort({ featuredOrder: 1, createdAt: -1 })
+      .limit(12)
+      .lean();
+
+      console.log("first",properties)
+
+    res.status(200).json({
+      success: true,
+      count: properties.length,
+      data: properties,
+    });
+  } catch (error) {
+    console.error("Error fetching featured properties:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+export const getRecommendedProperties = async (req, res) => {
+  try {
+    const properties = await PropertyModel.find({ status: true })
+      .select(
+        "title type pricing bedrooms bathrooms guests area location images propertyHighlights amenities neighborhood ratings bookingCount"
+      )
+      .populate("neighborhood", "name")
+      .sort({ bookingCount: -1, createdAt: -1 })
+      .limit(12)
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      count: properties.length,
+      data: properties,
+    });
+  } catch (error) {
+    console.error("Error fetching recommended properties:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+export const toggleFeaturedProperty = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isFeatured, featuredOrder } = req.body;
+
+    const property = await PropertyModel.findById(id);
+    if (!property) {
+      return res.status(404).json({ message: "Property not found" });
+    }
+
+    property.isFeatured = isFeatured !== undefined ? isFeatured : !property.isFeatured;
+    if (featuredOrder !== undefined) {
+      property.featuredOrder = featuredOrder;
+    }
+
+    await property.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Property ${property.isFeatured ? 'featured' : 'unfeatured'} successfully`,
+      property
+    });
+  } catch (error) {
+    console.error("Error toggling featured property:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };

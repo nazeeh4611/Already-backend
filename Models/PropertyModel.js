@@ -27,6 +27,14 @@ const propertySchema = new mongoose.Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true }
   },
+  isFeatured: {
+    type: Boolean,
+    default: false
+  },
+  featuredOrder: {
+    type: Number,
+    default: 0
+  },
   pricing: {
     night: { type: Number },
     week: { type: Number },
@@ -182,7 +190,11 @@ const propertySchema = new mongoose.Schema({
   reviews: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Review",
-  }]
+  }],
+  bookingCount: {
+    type: Number,
+    default: 0
+  }
 }, { timestamps: true });
 
 propertySchema.pre('save', function(next) {

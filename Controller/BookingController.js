@@ -81,7 +81,7 @@ export const confirmBooking = async (req, res) => {
     if (!token) return res.status(401).json({ message: "Unauthorized" });
     
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const booking = await BookingModel.findById(bookingId);
+    const booking = await BookingModel.findById(bookingId).populate('property');
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
     if (booking.user.toString() !== decoded.id) {
@@ -101,8 +101,19 @@ export const confirmBooking = async (req, res) => {
     booking.paymentMethod = paymentMethod;
     await booking.save();
 
+    // Update property availability
     await PropertyModel.findByIdAndUpdate(booking.property, {
-      $push: { "availability.unavailableDates": { checkIn: booking.checkIn, checkOut: booking.checkOut } },
+      $push: { 
+        "availability.unavailableDates": { 
+          checkIn: booking.checkIn, 
+          checkOut: booking.checkOut 
+        } 
+      },
+    });
+
+    // Increment booking count for the property
+    await PropertyModel.findByIdAndUpdate(booking.property, {
+      $inc: { bookingCount: 1 }
     });
 
     const property = await PropertyModel.findById(booking.property);
@@ -431,12 +442,10 @@ export const verifyAFSPayment = async (req, res) => {
     if (!token) return res.status(401).json({ message: 'Unauthorized' });
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ FIX: Populate property here
     const booking = await BookingModel.findById(bookingId).populate('property');
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     if (booking.user.toString() !== decoded.id) return res.status(403).json({ message: 'Not authorized' });
 
-    // Return early if already processed
     if (booking.paymentStatus === 'confirmed') return res.json({ success: true, confirmed: true, booking });
     if (booking.paymentStatus === 'failed') return res.json({ success: false, failed: true, message: booking.paymentDetails?.resultDescription });
 
@@ -472,7 +481,6 @@ export const verifyAFSPayment = async (req, res) => {
     const pendingPattern = /^(000\.200)/;
     const failedPattern = /^(000\.400|800\.|900\.|100\.)/;
 
-    // ✅ SUCCESS
     if (successPattern.test(resultCode)) {
       console.log('✅ PAYMENT SUCCESS');
 
@@ -502,8 +510,12 @@ export const verifyAFSPayment = async (req, res) => {
         },
       });
 
-      // ✅ FIX: Send email with proper property data
-      const property = booking.property; // Already populated above
+      // Increment booking count for the property
+      await PropertyModel.findByIdAndUpdate(booking.property._id, {
+        $inc: { bookingCount: 1 }
+      });
+
+      const property = booking.property;
       const emailHtml = generatePaymentSuccessEmailTemplate(booking, property, statusResponse.data);
       
       sendEmail(
@@ -520,13 +532,11 @@ export const verifyAFSPayment = async (req, res) => {
       });
     }
 
-    // ⏳ PENDING
     if (pendingPattern.test(resultCode)) {
       console.log('⏳ Payment still pending');
       return res.json({ success: false, pending: true, message: 'Waiting for payment submission...' });
     }
 
-    // ❌ FAILED
     if (failedPattern.test(resultCode)) {
       console.log('❌ PAYMENT FAILED');
       booking.paymentStatus = 'failed';
@@ -541,7 +551,6 @@ export const verifyAFSPayment = async (req, res) => {
       return res.json({ success: false, failed: true, message: result.description || 'Payment failed' });
     }
 
-    // ⚠️ Unknown status
     console.log('⚠️ Unknown result code:', resultCode);
     return res.json({ success: false, pending: true, message: 'Processing payment...', result });
 
