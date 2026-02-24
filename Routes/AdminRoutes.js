@@ -32,7 +32,7 @@ const categoryUpload = multer({
 const propertyUpload = multer({
   storage: multerS3({
     s3: s3Client,
-    bucket: "wavesproperty",
+    bucket: "alraqy-property",
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: (req, file, cb) => {
       cb(null, Date.now().toString() + "-" + file.originalname);

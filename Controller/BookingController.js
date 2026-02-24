@@ -191,7 +191,7 @@ export const initializeAFSPayment = async (req, res) => {
       ? 'https://test.oppwa.com/v1/checkouts'
       : 'https://eu-prod.oppwa.com/v1/checkouts';
 
-    const frontendUrl = (process.env.FRONTEND_URL || 'https://www.wavescation.com').replace(/\/$/, '');
+    const frontendUrl = (process.env.FRONTEND_URL || 'https://www.alrknalraqy.in').replace(/\/$/, '');
     const shopperResultUrl = `${frontendUrl}/payment-return`;
     const amount = booking.totalPrice;
     console.log("this be the total amount",booking)
@@ -205,7 +205,7 @@ export const initializeAFSPayment = async (req, res) => {
     params.append('merchantTransactionId', booking._id.toString());
 
     // Customer details
-    params.append('customer.email', booking.guestEmail || 'guest@wavescation.com');
+    params.append('customer.email', booking.guestEmail || 'guest@alrknalraqy.in');
     params.append('customer.givenName', booking.guestName || 'Guest');
     if (booking.guestPhone) params.append('customer.phone', booking.guestPhone);
 
@@ -799,7 +799,7 @@ function generatePaymentSuccessEmailTemplate(booking, property, paymentData) {
           </div>
 
           <div style="text-align: center;">
-            <a href="https://www.wavescation.com/profile" class="cta-button">View My Bookings</a>
+            <a href="https://www.alrknalraqy.in/profile" class="cta-button">View My Bookings</a>
           </div>
 
           <div class="message" style="margin-top: 30px;">
@@ -814,7 +814,7 @@ function generatePaymentSuccessEmailTemplate(booking, property, paymentData) {
         <div class="footer">
           <div class="footer-text">
             <strong>Need Help?</strong><br>
-            Contact us at support@wavescation.com<br>
+            Contact us at support@alrknalraqy.in<br>
             or visit our website
           </div>
           
@@ -951,7 +951,7 @@ function generateConfirmationEmailTemplate(booking, property, paymentMethod) {
           </div>
 
           <div style="text-align: center;">
-            <a href="https://www.wavescation.com/profile" class="cta-button">View My Bookings</a>
+            <a href="https://www.alrknalraqy.in/profile" class="cta-button">View My Bookings</a>
           </div>
 
           <div class="message" style="margin-top: 30px;">
@@ -965,8 +965,8 @@ function generateConfirmationEmailTemplate(booking, property, paymentMethod) {
         <div class="footer">
           <div class="footer-text">
             <strong>Need Help?</strong><br>
-            Email: support@wavescation.com<br>
-            Visit: www.wavescation.com
+            Email: support@alrknalraqy.in<br>
+            Visit: www.alrknalraqy.in
           </div>
           <div class="footer-text">
             © ${new Date().getFullYear()} Alrkn Alraqy Hotel Management. All rights reserved.

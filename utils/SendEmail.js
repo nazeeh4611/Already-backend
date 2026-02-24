@@ -38,7 +38,7 @@ const resend = new Resend(process.env.RESEND_API);
 
 export default async function sendEmail(to, subject, htmlContent) {
   await resend.emails.send({
-    from: 'noreply@wavescation.com', 
+    from: 'noreply@alrknalraqy.in', 
     to,
     subject,
     html: htmlContent,
