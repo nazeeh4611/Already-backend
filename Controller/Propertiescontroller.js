@@ -229,7 +229,6 @@ export const getFeaturedProperties = async (req, res) => {
       .limit(12)
       .lean();
 
-      console.log("first",properties)
 
     res.status(200).json({
       success: true,
